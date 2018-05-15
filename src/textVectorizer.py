@@ -1,6 +1,7 @@
 from argparse import ArgumentParser
 from os import listdir
 from os.path import basename
+from functools import reduce
 from porter_stem import PorterStemmer
 import csv
 import numpy as np
@@ -77,17 +78,24 @@ def parse_datadir(dirname, stopword, stemming):
     return vocab.keys(), vectors
 
 
-# TODO: This stores tfidf vectors in full which results in a very large (>300MB) file...
-#       Consider:
-#           (a) serializing it with pickle (this seems totally acceptable but may want to run it by Dehktyar
-#           (b) convert to scipy sparse matrix and store as binary
-#           (c) figure out another way to store the sparse matrices (can't think of a way right now)
-#def write_vectors(filename, vocab, vectors):
-#    with open(filename, 'w') as file:
-#        writer = csv.writer(file)
-#        for v in vectors:
-#            row = [v.tfidf[word] if word in word in v.tfidf else 0 for word in vocab]
-#            writer.writerow(row)
+def write_vectors(filename, vectors):
+    with open(filename, 'w') as file:
+        writer = csv.writer(file)
+        for v in vectors:
+            # store comma separated parise -> word,tfidf,word,tfidf,...
+            row = reduce(lambda a, b: a + b, [[word, val] for word, val in v.tfidf.items()])
+            writer.writerow(row)
+
+def read_vectors(filename):
+    vectors = []
+    with open(filename, 'r') as file:
+        reader = csv.reader(file)
+        for row in reader:
+            tfidf = {}
+            for index in range(0, len(row), 2):
+                tfidf[row[index]] = float(row[index + 1])
+            vectors.append(Vector(tfidf))
+    return vectors
 
 def write_truths(filename, truths):
     with open(filename, 'w') as file:
@@ -106,8 +114,10 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # generate ground-truths and corresponding vectors as parallel lists
-    vocab, result = parse_datadir(args.datadir, args.stopword, args.stemming)
-    truths, vectors = zip(*result)
-    #write_vectors(args.outfile, vocab, vectors)
-    write_truths(args.outfile.split('.')[0] + "_truths.csv", truths)
+    #vocab, result = parse_datadir(args.datadir, args.stopword, args.stemming)
+    #truths, vectors = zip(*result)
+    #write_vectors(args.outfile, vectors)
+    #write_truths(args.outfile.split('.')[0] + "_truths.csv", truths)
+    #vectors = read_vectors("out.csv")
+
 
