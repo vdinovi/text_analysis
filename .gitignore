@@ -1,0 +1,8 @@
+.*.swp
+dataset/**
+*.json
+__pycache__
+*.pyc
+src/**/*.png
+.DS_Store
+spec.pdf
