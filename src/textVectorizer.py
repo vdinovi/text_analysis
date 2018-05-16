@@ -9,10 +9,10 @@ import pdb
 import math
 import re
 
-
 class Vector:
-    def __init__(self, tfidf):
+    def __init__(self, tfidf, label):
         self.tfidf = tfidf
+        self.label = label
 
     def cosine_similarity(self, other):
         numerator = 0
@@ -74,7 +74,7 @@ def parse_datadir(dirname, stopword, stemming):
         for document, words in works.items():
             for word, freq in words.items():
                 data[author][document][word] = freq * vocab[word]
-            vectors.append(((author, document), Vector(data[author][document])))
+            vectors.append(((author, document), Vector(data[author][document], (author, document))))
     return vocab.keys(), vectors
 
 
@@ -84,6 +84,7 @@ def write_vectors(filename, vectors):
         for v in vectors:
             # store comma separated parise -> word,tfidf,word,tfidf,...
             row = reduce(lambda a, b: a + b, [[word, val] for word, val in v.tfidf.items()])
+            row = list(v.label) + row
             writer.writerow(row)
 
 def read_vectors(filename):
@@ -91,10 +92,10 @@ def read_vectors(filename):
     with open(filename, 'r') as file:
         reader = csv.reader(file)
         for row in reader:
-            tfidf = {}
-            for index in range(0, len(row), 2):
-                tfidf[row[index]] = float(row[index + 1])
-            vectors.append(Vector(tfidf))
+            v = Vector({}, (row[0], row[1]))
+            for index in range(2, len(row), 2):
+                v.tfidf[row[index]] = float(row[index + 1])
+            vectors.append(v)
     return vectors
 
 def write_truths(filename, truths):
@@ -103,7 +104,10 @@ def write_truths(filename, truths):
         for t in truths:
             writer.writerow(list(t))
 
-
+def read_truths(filename):
+    with open(filename, 'r') as file:
+        reader = csv.reader(file)
+        return [tuple(row) for row in reader]
 
 if __name__ == "__main__":
     parser = ArgumentParser(description="A text vectorizer -- produces a file of vectorized tf-idf documents and a ground truth file from the Reuter 50-50 dataset.")
@@ -114,10 +118,12 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # generate ground-truths and corresponding vectors as parallel lists
-    #vocab, result = parse_datadir(args.datadir, args.stopword, args.stemming)
-    #truths, vectors = zip(*result)
-    #write_vectors(args.outfile, vectors)
-    #write_truths(args.outfile.split('.')[0] + "_truths.csv", truths)
+    vocab, result = parse_datadir(args.datadir, args.stopword, args.stemming)
+    truths, vectors = zip(*result)
+    write_vectors(args.outfile, vectors)
+    write_truths(args.outfile.split('.')[0] + "_truths.csv", truths)
     #vectors = read_vectors("out.csv")
+    #truths = read_truths("out_truths.csv")
+    #pdb.set_trace()
 
 
