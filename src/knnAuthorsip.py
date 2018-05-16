@@ -24,10 +24,8 @@ class KNNClassifer:
         nearest = [x[1]  for x in nlargest(self.k, queue, lambda x: x[0])]
         return max(set(nearest), key= nearest.count)
 
-
 def classify_vectors(knn, vectors):
     return [knn.classify(v) for v in vectors]
-
 
 if __name__ == "__main__":
     parser = ArgumentParser(description="Generates a KNN classifer")
@@ -37,6 +35,7 @@ if __name__ == "__main__":
 
     knn = KNNClassifer("model.csv", 'COSINE', 3)
     vectors = read_vectors(args.vectorfile)
+
     results = classify_vectors(knn, vectors)
     with open("results.txt", "r") as file:
         for result in results:
