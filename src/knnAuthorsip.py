@@ -47,10 +47,10 @@ if __name__ == "__main__":
     #parser.add_argument("distance_method", help="The type of distance measure to use. Options: COSINE | OKAPI")
     #args = parser.parse_args()
 
-    knn = KNNClassifer("small.csv", 'COSINE', 3)
-    dfs, model = read_model("small.csv")
+    knn = KNNClassifer("model.csv", 'COSINE', 3)
+    dfs, model = read_model("model.csv")
     vectors = model.values()
-    truths = read_truths("small_truths.csv")
+    truths = read_truths("model_truths.csv")
     results = classify_vectors(knn, vectors)
     for i in range(0, len(truths)):
         print("{} -> {}".format(truths[i], results[i]))
