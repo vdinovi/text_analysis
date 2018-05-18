@@ -48,6 +48,7 @@ def parse_datadir(dirname, stopword, stemming):
     # Filter out words containing invalid characters
     wf = re.compile(".*[0-9\`\@\#\$\%\^\&\*\+\_\{\}\[\]]+.*")
     # Generate
+    print("-> calculating model from ", dirname)
     for author in listdir(dirname):
         data[author] = {}
         for document in listdir(dirname + '/' + author):
@@ -90,6 +91,7 @@ def parse_datadir(dirname, stopword, stemming):
 #   Author,Document,vw1,vfw1,vw2,vfw2,... <-- sparse vector format
 def write_model(filename, dfs, vectors):
     with open(filename, 'w') as file:
+        print("-> writing model to ", filename)
         writer = csv.writer(file)
         # Write doc freqs for all words in vocab
         row = reduce(lambda a, b: a + b, [[word, df] for word, df in dfs.items()])
@@ -103,6 +105,7 @@ def read_model(filename):
     vectors = {}
     dfs = {}
     with open(filename, 'r') as file:
+        print("-> reading model from ", filename)
         reader = csv.reader(file)
         row = next(reader)
         # Read doc freqs
@@ -120,11 +123,13 @@ def read_model(filename):
 # Store truths as one author per line
 def write_truths(filename, truths):
     with open(filename, 'w') as file:
+        print("-> writing ground truths to ", filename)
         for t in truths:
             file.write(t + "\n")
 
 def read_truths(filename):
     with open(filename, 'r') as file:
+        print("-> reading ground truths from ", filename)
         return [line.strip('\n') for line in file.readlines()]
 
 if __name__ == "__main__":
