@@ -75,11 +75,20 @@ def process_cosine_sim(outq, key, work, num_docs, dfs, vectors):
     outq.put(results)
     print("   - ending processing for ", key)
 
-
-
 def classify_vectors(knn, vectors, k):
     print("-> classifying input")
     return [knn.classify(v, k) for v in vectors]
+
+def write_results(filename, results):
+    with open(filename, 'w') as file:
+        print("-> writing results to ", filename)
+        for r in results:
+            file.write(r + "\n")
+
+def read_results(filename):
+    with open(filename, 'r') as file:
+        print("-> reading results from ", filename)
+        return [line.strip('\n') for line in file.readlines()]
 
 if __name__ == "__main__":
     parser = ArgumentParser(description="Generates a KNN classifer")
