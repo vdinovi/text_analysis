@@ -144,7 +144,5 @@ if __name__ == "__main__":
     labels, dfs, vectors = parse_datadir(args.datadir, args.stopword, args.stemming)
     write_model(args.outfile, dfs, vectors)
     write_truths(args.outfile.split('.')[0] + "_truths.csv", labels)
-    #rdfs, rvectors = read_model(args.outfile)
-    #rtruths = read_truths(args.outfile.split('.')[0] + "_truths.csv")
 
 
