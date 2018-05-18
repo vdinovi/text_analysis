@@ -1,8 +1,8 @@
 from argparse import ArgumentParser
-from heapq import heappush, nlargest
 from textVectorizer import Vector, read_model, read_truths
 import numpy as np
-import threading
+#import threading
+from multiprocessing import Process, Queue
 import pdb
 
 class KNNClassifer:
@@ -15,44 +15,51 @@ class KNNClassifer:
         self.dist_method = dist_method
         dfs, vectors = read_model(data_filename)
         if dist_method == 'COSINE':
-            self.dist_matrix, self.indices = self.cosine_sim_mat(dfs, vectors)
+            self.generate_cosine_sim_mat(dfs, vectors)
         else:
-            self.dist_matrix, self.indices = self.okapi_mat(dfs, vectors)
+            self.generate_okapi_mat(dfs, vectors)
 
     def classify(self, vector):
-        closest = self.dist_matrix[self.indices.index(vector.label)].argsort()[-self.k:][::-1]
+        closest = self.dist_mat[self.rev_indices[vector.label]].argsort()[-self.k:][::-1]
         return [self.indices[c][0] for c in closest]
 
-    @classmethod
-    def cosine_sim_mat(cls, dfs, vectors):
-        indices = [v for v in vectors]
+    def generate_cosine_sim_mat(self, dfs, vectors):
+        self.indices = [v for v in vectors]
+        self.rev_indices = {self.indices[i]: i for i in range(0, len(self.indices))}
+        self.dist_mat = np.zeros(shape=(len(self.indices), len(self.indices)))
+
         num_docs = len(vectors)
-        dist_mat = np.zeros(shape=(len(indices), len(indices)))
-        thread_keys = {index[0] for index in indices}
-        threads = []
         # Parellelize the work by author
-        for key in thread_keys:
-            thd = threading.Thread(target=process_cosine_sim, args=(key, dfs, vectors, dist_mat, indices, num_docs))
-            thd.daemon = True
-            threads.append(thd)
-            print("   + spawning processing thread for ", key)
-            thd.start()
-        for thd in threads:
-            thd.join()
-        return dist_mat, indices
+        procs = []
+        proc_keys = { index[0] for index in self.indices }
+        result_q = Queue()
+        for key in proc_keys:
+            work = [(index[0], index[1]) for index in self.indices if index[0] == key]
+            proc = Process(target=process_cosine_sim, args=(result_q, key, work, num_docs, dfs, vectors))
+            procs.append(proc)
+            print("   + spawning process for ", key)
+            proc.start()
+        # Consume from workers
+        for _ in range(len(procs)):
+            for res in result_q.get():
+                self.dist_mat[self.rev_indices[res[0][0]], self.rev_indices[res[0][1]]] = res[1]
+                self.dist_mat[self.rev_indices[res[0][1]], self.rev_indices[res[0][0]]] = res[1]
+        for proc in procs:
+            proc.join()
 
     @classmethod
-    def okapi_mat(cls, dfs, vectors):
+    def generate_okapi_mat(cls, dfs, vectors):
         return None, [v.label for v in vectors]
 
-def process_cosine_sim(key, dfs, vectors, dist_mat, indices, num_docs):
-    work = [i for i in range(0, len(indices)) if indices[i][0] == key]
-    for row in work:
-        for col in range(row + 1, len(indices)):
-            # cosine similairty is commutative, copy across main diagonal
-            dist_mat[row, col] = vectors[indices[row]].cosine_sim(dfs, num_docs, vectors[indices[col]])
-            dist_mat[col, row] = dist_mat[row, col]
-    print("   - ending processing thread for ", key)
+def process_cosine_sim(outq, key, work, num_docs, dfs, vectors):
+    results = []
+    for item1 in work:
+        v = vectors[item1]
+        for item2, w in vectors.items():
+            if item1 != item2:
+                results.append(((item1, item2), v.cosine_sim(dfs, num_docs, w)))
+    print("   - ending processing for ", key)
+    outq.put(results)
 
 
 
@@ -74,6 +81,7 @@ if __name__ == "__main__":
     results = classify_vectors(knn, vectors)
 
     with open(args.outfile, 'w') as file:
+        print("-> writing classication results to ", args.outfile)
         for i in range(0, len(truths)):
             file.write("{} -> {}\n".format(truths[i], results[i]))
 
