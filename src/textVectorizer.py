@@ -10,24 +10,25 @@ import math
 import re
 
 class Vector:
-    def __init__(self, tfidf, label):
-        self.tfidf = tfidf
+    def __init__(self, label, term_freqs):
         self.label = label
+        self.tfs = term_freqs
 
-    def cosine_similarity(self, other):
+    def cosine_sim(self, dfs, num_docs, other):
         numerator = 0
         self_denom = 0
         other_denom = 0
-        for word, val in self.tfidf.items():
-            numerator += val * other.tfidf.get(word, 0)
-            self_denom += self.tfidf[word] ** 2
-        for word, val in other.tfidf.items():
-            other_denom += other.tfidf[word] ** 2
+        for word, freq in self.tfs.items():
+            idf = math.log(num_docs / dfs[word])
+            if word in other.tfs:
+                numerator += freq * idf * other.tfs[word] * idf
+            self_denom += (freq * idf) ** 2
+        for word, freq in other.tfs.items():
+            other_denom += (other.tfs[word] * idf) ** 2
         return float(numerator) / math.sqrt(self_denom * other_denom)
 
-
     def okapi(self, other):
-        return 0;
+        return 0
 
 def read_stopwords():
     with open("stopwords.txt", "r") as file:
@@ -35,79 +36,96 @@ def read_stopwords():
 
 def parse_datadir(dirname, stopword, stemming):
     vectors = []
+    labels = []
+    dfs = {}
+
     data = {}
-    vocab = {}
     num_docs = 0
     if stopword:
         stopwords = read_stopwords()
     if stemming:
         stemmer = PorterStemmer()
+    # Filter out words containing invalid characters
+    wf = re.compile(".*[0-9\`\@\#\$\%\^\&\*\+\_\{\}\[\]]+.*")
+    # Generate
     for author in listdir(dirname):
         data[author] = {}
         for document in listdir(dirname + '/' + author):
             num_docs += 1
             data[author][document] = {}
             with open(dirname + '/' + author + '/' + document, 'r') as file:
-                words = list(filter(lambda w: w != '', re.split(" |\.|\n", file.read())))
+                words = list(filter(lambda w: w != '' and not re.match(wf, w), re.split(" |\.|\n", file.read())))
                 if stopword:
-                    words = [word for word in words if word not in stopwords]
+                    words = [word for word in words if word not in stopwords and not re.match(wf, word)]
                 if stemming:
                     words = [stemmer.stem(word, 0, len(word) - 1) for word in words]
                 for word in words:
-                    if word not in vocab:
-                        # word does not exist, add to vocab with one appearence in this document 
-                        vocab[word] = {document}
-                    elif document not in vocab[word]:
+                    if word not in dfs:
+                        # word does not exist, add to dfs with one appearence in this document 
+                        dfs[word] = {document}
+                    elif document not in dfs[word]:
                         # word exists, but first appearance in this document
-                        vocab[word].add(document)
+                        dfs[word].add(document)
                     if word not in data[author][document]:
                         # first word occurrence in document, init to 1
                         data[author][document][word] = 1
                     else:
                         # not first word occurrence in document, increment
                         data[author][document][word] += 1
-    # calculate idfs
-    for word, docs in vocab.items():
-        vocab[word] = math.log(num_docs / len(docs))
-    # calculate tf-idfs and create vectors
+    # Create vectors from term freqs
     for author, works in data.items():
         for document, words in works.items():
             for word, freq in words.items():
-                data[author][document][word] = freq * vocab[word]
-            vectors.append(((author, document), Vector(data[author][document], (author, document))))
-    return vocab.keys(), vectors
+                data[author][document][word] = freq
+            labels.append(author)
+            vectors.append(Vector((author, document), data[author][document]))
+    # Convert to doc freqs
+    for word in dfs:
+        dfs[word] = len(dfs[word])
+    return labels, dfs, vectors
 
 
-def write_vectors(filename, vectors):
+# Stores doc-freqs and tf-vectors in the form:
+#   w1,df1,w2,df2,...                     <-- doc freqs per word
+#   Author,Document,vw1,vfw1,vw2,vfw2,... <-- sparse vector format
+def write_model(filename, dfs, vectors):
     with open(filename, 'w') as file:
         writer = csv.writer(file)
+        # Write doc freqs for all words in vocab
+        row = reduce(lambda a, b: a + b, [[word, df] for word, df in dfs.items()])
+        writer.writerow(row)
+        # Write tf-vectors in sparse form (word, freq), ...
         for v in vectors:
-            # store comma separated parise -> word,tfidf,word,tfidf,...
-            row = reduce(lambda a, b: a + b, [[word, val] for word, val in v.tfidf.items()])
-            row = list(v.label) + row
-            writer.writerow(row)
+            row = reduce(lambda a, b: a + b, [[word, freq] for word, freq in v.tfs.items()])
+            writer.writerow([v.label[0], v.label[1]] + row)
 
-def read_vectors(filename):
-    vectors = []
+def read_model(filename):
+    vectors = {}
+    dfs = {}
     with open(filename, 'r') as file:
         reader = csv.reader(file)
+        row = next(reader)
+        # Read doc freqs
+        for index in range(0, len(row), 2):
+            dfs[row[index]] = int(row[index + 1])
+        # Read tf-vectors
         for row in reader:
-            v = Vector({}, (row[0], row[1]))
+            tfs = {}
+            label = (row[0], row[1])
             for index in range(2, len(row), 2):
-                v.tfidf[row[index]] = float(row[index + 1])
-            vectors.append(v)
-    return vectors
+                tfs[row[index]] = int(row[index + 1])
+            vectors[label] = Vector(label, tfs)
+    return dfs, vectors
 
+# Store truths as one author per line
 def write_truths(filename, truths):
     with open(filename, 'w') as file:
-        writer = csv.writer(file)
         for t in truths:
-            writer.writerow(list(t))
+            file.write(t + "\n")
 
 def read_truths(filename):
     with open(filename, 'r') as file:
-        reader = csv.reader(file)
-        return [tuple(row) for row in reader]
+        return [line.strip('\n') for line in file.readlines()]
 
 if __name__ == "__main__":
     parser = ArgumentParser(description="A text vectorizer -- produces a file of vectorized tf-idf documents and a ground truth file from the Reuter 50-50 dataset.")
@@ -118,12 +136,10 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # generate ground-truths and corresponding vectors as parallel lists
-    vocab, result = parse_datadir(args.datadir, args.stopword, args.stemming)
-    truths, vectors = zip(*result)
-    write_vectors(args.outfile, vectors)
-    write_truths(args.outfile.split('.')[0] + "_truths.csv", truths)
-    #vectors = read_vectors("out.csv")
-    #truths = read_truths("out_truths.csv")
-    #pdb.set_trace()
+    labels, dfs, vectors = parse_datadir(args.datadir, args.stopword, args.stemming)
+    write_model(args.outfile, dfs, vectors)
+    write_truths(args.outfile.split('.')[0] + "_truths.csv", labels)
+    #rdfs, rvectors = read_model(args.outfile)
+    #rtruths = read_truths(args.outfile.split('.')[0] + "_truths.csv")
 
 
