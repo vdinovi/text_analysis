@@ -63,10 +63,7 @@ def process_cosine_sim(outq, key, work, num_docs, dfs, vectors):
         for item2, w in vectors.items():
             if item1 != item2:
                 results.append(((item1, item2), v.cosine_sim(dfs, num_docs, w)))
-    outq.put(results)
-    print("   - ending processing for ", key)
-
-def find_closest(dist_mat):
+    outq.put(results) print("   - ending processing for ", key) def find_closest(dist_mat):
     x, y, dist = 0, 0, sys.float_info.max
     for ai in range(0, len(dist_mat)):
         for bi in range(ai, len(dist_mat)):
@@ -89,25 +86,6 @@ def generate(dfs, vectors, dist_func):
         clusters.pop(c2)
     tree[0].node_type = "ROOT"
     return tree[0]
-
-def gather(node):
-    if node.node_type == "LEAF":
-        return [node.data]
-    else:
-        cluster = []
-        for child in node.data:
-            cluster += gather(child)
-        return cluster
-
-def get_clusters(node, threshold, clusters):
-    if node.node_type == "LEAF":
-        clusters.append([node.data])
-    elif node.height <= threshold:
-        clusters.append(gather(node))
-    else:
-        for child in node.data:
-            get_clusters(child, threshold, clusters)
-
 
 if __name__ == "__main__":
     parser = ArgumentParser(description="Generates a hierarchical cluster dendrogram")
