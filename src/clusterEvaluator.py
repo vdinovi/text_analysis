@@ -15,6 +15,38 @@ def gather(node):
             cluster += gather(child)
         return cluster
 
+def check_size(node):
+    if node['type'] == 'LEAF':
+        return 1
+    else:
+        return sum([check_size(child) for child in node['nodes']])
+
+def extract_clusters(root, num_clusters, min_size):
+    clusters = [root]
+    while len(clusters) < num_clusters:
+        print(len(clusters))
+        expandable = [n for n in clusters if 'nodes' in n]
+        if not expandable:
+            break
+        new_nodes = []
+        for node in expandable:
+            temp = []
+            for child in node['nodes']:
+                if child['type'] != 'LEAF' and check_size(child) >= min_size:
+                    new_nodes.append(child)
+            if temp:
+                clusters.remove(node)
+            new_nodes += temp
+        if new_nodes:
+            clusters += new_nodes
+        else:
+            break
+        if len(clusters) >= num_clusters:
+            break
+    return [gather(node) for node in clusters]
+
+
+"""
 def extract_clusters(root, num_clusters):
     assert(num_clusters > 0)
     clusters = [root]
@@ -40,6 +72,7 @@ def extract_clusters(root, num_clusters):
         if len(clusters) >= num_clusters or not [n for n in clusters if 'nodes' in n]:
             break
     return [gather(node) for node in clusters]
+"""
 
 if __name__ == "__main__":
     parser = ArgumentParser(description="Evaluates a Hierarchical clustering")
@@ -49,8 +82,8 @@ if __name__ == "__main__":
 
     with open(args.dendrogram) as file:
         tree = json.load(file)
-    clusters = extract_clusters(tree, 4)
-    print(len(clusters))
+    clusters = extract_clusters(tree, 4, 2)
+    pdb.set_trace()
 
 
 
