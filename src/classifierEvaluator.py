@@ -28,12 +28,12 @@ def eval_precision_recall(authors, conf_matr, beta = 1):
                 true_neg += trace - matr[row][col]
             else:
                 false_neg += matr[row][col]
-                false_pos += matr[row][col]
+                false_pos += matr[col][row]
         precision = true_pos / (true_pos + false_pos)
         recall = true_pos / (true_pos + false_neg)
         authors[names[row]]['f_measure'] = (1 + beta ** 2) * (precision * recall / (beta ** 2 * precision + recall))
         authors[names[row]]['precision'] = precision
-        authors[names[row]]['recall'] = precision
+        authors[names[row]]['recall'] = recall
 
 def eval_accuracy(conf_matr):
     matr = conf_matr.values
@@ -46,7 +46,7 @@ def eval_accuracy(conf_matr):
             else:
                 incorrect += matr[row][col]
     accuracy = float(correct) / (correct + incorrect)
-    return correct, incorrect, accuracy
+    return int(correct), int(incorrect), accuracy
 
 def parse_results(truths, results):
     authors = {author: {'hits': 0, 'strikes': 0, 'misses': 0} for author in set(truths)}
@@ -81,7 +81,7 @@ if __name__ == "__main__":
     for name, result in authors.items():
         print("  - {}:".format(name))
         print("      hits = {},  strikes = {},  misses = {}".format(result['hits'], result['strikes'], result['misses']))
-        print("      precision = {:4f},  recall = {:.4f},  f-measure = {:.4f}".format(result['precision'], result['recall'], result['f_measure']))
+        print("      precision = {:.4f},  recall = {:.4f},  f-measure = {:.4f}".format(result['precision'], result['recall'], result['f_measure']))
 
     with open(args.confusion_outfile, 'w') as file:
         print("-> writing confusion matrix to ", args.confusion_outfile)
