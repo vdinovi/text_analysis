@@ -3,6 +3,7 @@ from textVectorizer import Vector, read_model, read_truths
 import numpy as np
 from multiprocessing import Process, Queue
 import pickle
+import string
 import pdb
 
 class KNNClassifier:
@@ -37,17 +38,19 @@ class KNNClassifier:
         indices = [v for v in vectors]
         rev_indices = {indices[i]: i for i in range(0, len(indices))}
         dist_mat = np.zeros(shape=(len(indices), len(indices)))
-
         num_docs = len(vectors)
-        # Parellelize the work by author
+
+        # Parellelize the work by authors
         procs = []
-        proc_keys = { index[0] for index in indices }
+        proc_keys = {l for l in chunks(string.ascii_lowercase, len(string.ascii_lowercase) // 4)}
         result_q = Queue()
         for key in proc_keys:
-            work = [(index[0], index[1]) for index in indices if index[0] == key]
+            work = [(index[0], index[1]) for index in indices if index[0][0].lower() in key]
+            if not work:
+                continue
             proc = Process(target=process_cosine_sim, args=(result_q, key, work, num_docs, dfs, vectors))
             procs.append(proc)
-            print("   + spawning process for ", key)
+            print("   + spawning process for authors in ", key)
             proc.start()
         # Consume from workers
         for _ in range(len(procs)):
@@ -64,18 +67,20 @@ class KNNClassifier:
         indices = [v for v in vectors]
         rev_indices = {indices[i]: i for i in range(0, len(indices))}
         dist_mat = np.zeros(shape=(len(indices), len(indices)))
-
         num_docs = len(vectors)
         avg_doc_length = sum([len(v.tfs) for v in vectors.values()]) / float(len(vectors))
-        # Parellelize the work by author
+
+        # Parellelize the work by authors
         procs = []
-        proc_keys = { index[0] for index in indices }
+        proc_keys = {l for l in chunks(string.ascii_lowercase, len(string.ascii_lowercase) // 4)}
         result_q = Queue()
         for key in proc_keys:
-            work = [(index[0], index[1]) for index in indices if index[0] == key]
+            work = [(index[0], index[1]) for index in indices if index[0][0].lower() in key]
+            if not work:
+                continue
             proc = Process(target=process_okapi, args=(result_q, key, work, num_docs, avg_doc_length, dfs, vectors))
             procs.append(proc)
-            print("   + spawning process for ", key)
+            print("   + spawning process for authors in ", key)
             proc.start()
         # Consume from workers
         for _ in range(len(procs)):
@@ -95,7 +100,7 @@ def process_cosine_sim(outq, key, work, num_docs, dfs, vectors):
             if item1 != item2:
                 results.append(((item1, item2), v.cosine_sim(dfs, num_docs, w)))
     outq.put(results)
-    print("   - ending process for ", key)
+    print("   - ending process for authors in ", key)
 
 def process_okapi(outq, key, work, num_docs, avg_dl, dfs, vectors):
     results = []
@@ -105,7 +110,12 @@ def process_okapi(outq, key, work, num_docs, avg_dl, dfs, vectors):
             if item1 != item2:
                 results.append(((item1, item2), v.okapi(dfs, num_docs, avg_dl, w)))
     outq.put(results)
-    print("   - ending process for ", key)
+    print("   - ending process for authors in ", key)
+
+def chunks(l, n):
+    """Yield successive n-sized chunks from l."""
+    for i in range(0, len(l), n):
+        yield l[i:i + n]
 
 def classify_vectors(knn, vectors, k):
     print("-> classifying input")

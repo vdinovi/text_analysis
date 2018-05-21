@@ -96,6 +96,8 @@ def parse_datadir(dirname, stopword, stemming):
     # Convert to doc freqs
     for word in dfs:
         dfs[word] = len(dfs[word])
+    print("  Vocab Size: {}".format(len(dfs)))
+    print("  Num Docs:   {}".format(len(vectors)))
     return labels, dfs, vectors
 
 

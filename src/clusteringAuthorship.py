@@ -7,6 +7,7 @@ from datetime import datetime
 import numpy as np
 import math
 from pprint import pprint
+import string
 import sys
 import json
 import pdb
@@ -35,17 +36,19 @@ def cosine_sim_mat(dfs, vectors):
     clusters = [(index,) for index in range(0, len(indices))]
     rev_indices = {indices[i]: i for i in range(0, len(indices))}
     dist_mat = np.zeros(shape=(len(indices), len(indices)))
-
     num_docs = len(vectors)
-    # Parellelize the work by author
+
+    # Parellelize the work by authors
     procs = []
-    proc_keys = { index[0] for index in indices }
+    proc_keys = {l for l in chunks(string.ascii_lowercase, len(string.ascii_lowercase) // 4)}
     result_q = Queue()
     for key in proc_keys:
-        work = [(index[0], index[1]) for index in indices if index[0] == key]
+        work = [(index[0], index[1]) for index in indices if index[0][0].lower() in key]
+        if not work:
+            continue
         proc = Process(target=process_cosine_sim, args=(result_q, key, work, num_docs, dfs, vectors))
         procs.append(proc)
-        print("   + spawning process for ", key)
+        print("   + spawning process for authors in ", key)
         proc.start()
     # Consume from workers
     for _ in range(len(procs)):
@@ -63,7 +66,15 @@ def process_cosine_sim(outq, key, work, num_docs, dfs, vectors):
         for item2, w in vectors.items():
             if item1 != item2:
                 results.append(((item1, item2), v.cosine_sim(dfs, num_docs, w)))
-    outq.put(results) print("   - ending processing for ", key) def find_closest(dist_mat):
+    outq.put(results)
+    print("   - ending process for authors in ", key)
+
+def chunks(l, n):
+    """Yield successive n-sized chunks from l."""
+    for i in range(0, len(l), n):
+        yield l[i:i + n]
+
+def find_closest(dist_mat):
     x, y, dist = 0, 0, sys.float_info.max
     for ai in range(0, len(dist_mat)):
         for bi in range(ai, len(dist_mat)):
