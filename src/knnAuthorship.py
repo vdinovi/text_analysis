@@ -29,8 +29,7 @@ class KNNClassifier:
         if dist_method == 'COSINE':
             indices, rev_indices, dist_mat = cls.generate_cosine_sim_mat(dfs, vectors)
         else:
-            raise "Okapi NYI"
-            #indices, rev_indices, dist_mat = cls.generate_okapi_mat(dfs, vectors)
+            indices, rev_indices, dist_mat = cls.generate_okapi_mat(dfs, vectors)
         return KNNClassifier(dist_method, dist_mat, indices, rev_indices)
 
     @staticmethod
@@ -62,8 +61,31 @@ class KNNClassifier:
 
     @staticmethod
     def generate_okapi_mat(dfs, vectors):
-        # @TODO
-        return None, None, [v.label for v in vectors]
+        indices = [v for v in vectors]
+        rev_indices = {indices[i]: i for i in range(0, len(indices))}
+        dist_mat = np.zeros(shape=(len(indices), len(indices)))
+
+        num_docs = len(vectors)
+        avg_doc_length = sum([len(v.tfs) for v in vectors.values()]) / float(len(vectors))
+        # Parellelize the work by author
+        procs = []
+        proc_keys = { index[0] for index in indices }
+        result_q = Queue()
+        for key in proc_keys:
+            work = [(index[0], index[1]) for index in indices if index[0] == key]
+            proc = Process(target=process_okapi, args=(result_q, key, work, num_docs, avg_doc_length, dfs, vectors))
+            procs.append(proc)
+            print("   + spawning process for ", key)
+            proc.start()
+        # Consume from workers
+        for _ in range(len(procs)):
+            for res in result_q.get():
+                dist_mat[rev_indices[res[0][0]], rev_indices[res[0][1]]] = res[1]
+                dist_mat[rev_indices[res[0][1]], rev_indices[res[0][0]]] = res[1]
+        for proc in procs:
+            proc.join()
+
+        return indices, rev_indices, dist_mat
 
 def process_cosine_sim(outq, key, work, num_docs, dfs, vectors):
     results = []
@@ -73,7 +95,17 @@ def process_cosine_sim(outq, key, work, num_docs, dfs, vectors):
             if item1 != item2:
                 results.append(((item1, item2), v.cosine_sim(dfs, num_docs, w)))
     outq.put(results)
-    print("   - ending processing for ", key)
+    print("   - ending process for ", key)
+
+def process_okapi(outq, key, work, num_docs, avg_dl, dfs, vectors):
+    results = []
+    for item1 in work:
+        v = vectors[item1]
+        for item2, w in vectors.items():
+            if item1 != item2:
+                results.append(((item1, item2), v.okapi(dfs, num_docs, avg_dl, w)))
+    outq.put(results)
+    print("   - ending process for ", key)
 
 def classify_vectors(knn, vectors, k):
     print("-> classifying input")

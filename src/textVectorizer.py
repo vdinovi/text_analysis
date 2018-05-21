@@ -27,8 +27,21 @@ class Vector:
             other_denom += (other.tfs[word] * idf) ** 2
         return float(numerator) / math.sqrt(self_denom * other_denom)
 
-    def okapi(self, other):
-        return 0
+    def okapi(self, dfs, num_docs, avg_dl, other):
+        k1 = 1.5
+        k2 = 500
+        b = 0.375
+        accum = 0
+        for word, freq in self.tfs.items():
+            if word in other.tfs:
+                dfs_w = dfs[word]
+                tfs_o = other.tfs[word]
+                tfs_s = self.tfs[word]
+                doc_freq = math.log((num_docs - dfs_w + 0.5) / (dfs_w + 0.5))
+                other_tf = (((k1 + 1) * tfs_o) / (k1 * (1 - b + b * num_docs / avg_dl) + tfs_o))
+                self_tf = (((k2 + 1) * tfs_s) / (k2 + tfs_s))
+                accum += doc_freq * other_tf * self_tf
+        return accum
 
 def read_stopwords():
     with open("stopwords.txt", "r") as file:
