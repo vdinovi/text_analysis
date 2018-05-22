@@ -1,5 +1,4 @@
 .*.swp
-dataset/**
 *.json
 __pycache__
 *.pyc
@@ -7,3 +6,6 @@ src/**/*.png
 .DS_Store
 *.csv
 spec.pdf
+out
+*.pickle
+*.out
