@@ -15,17 +15,19 @@ class Node:
         self.data = data
         self.height = float(height)
 
-    def to_dict(self):
-        # This needs to be NOT recursive -- reaches max recursion depth...
-        node = {
-            "type": self.node_type,
-            "height": self.height,
-        }
-        if self.node_type == "LEAF":
-            node["data"] = self.data
-        else:
-            node["nodes"] = [child.to_dict() for child in self.data]
-        return node
+    # Using pickle instead, this is just an inneficient
+    # the json tree is so large that its barely decipherable anyway
+    # -- pickle requires less storage and is faster
+    #def to_dict(self):
+    #    node = {
+    #        "type": self.node_type,
+    #        "height": self.height,
+    #    }
+    #    if self.node_type == "LEAF":
+    #        node["data"] = self.data
+    #    else:
+    #        node["nodes"] = [child.to_dict() for child in self.data]
+    #    return node
 
 def generate_cosine_sim_mat(dfs, vectors):
     indices = [v for v in vectors]
