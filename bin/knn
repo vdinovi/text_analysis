@@ -16,8 +16,6 @@ mkdir C50train
     echo "  evaluating.."
     python3 ../../src/classifierEvaluator.py truths.out result.out conf.csv > stats.out
 )
-exit
-
 # Stopwords
 echo "Stopwords"
 mkdir C50train_stop
