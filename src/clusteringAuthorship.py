@@ -73,8 +73,7 @@ if __name__ == "__main__":
     parser.add_argument("outfile", help="Write the resulting dendrogram to this file")
     parser.add_argument("--link-method", default="SINGLE", help="Specify link-method for agglomeration. Allowed values: SINGLE | COMPLETE | AVERAGE. By default SINGLE.")
     args = parser.parse_args()
-    sys.setrecursionlimit(5000)
-
+    sys.setrecursionlimit(25000)
     link_methods = {
         "SINGLE":   single_link,
         "COMPLETE": complete_link,
