@@ -1,6 +1,5 @@
 .*.swp
 dataset/**
-*.json
 __pycache__
 *.pyc
 src/**/*.png
@@ -8,4 +7,3 @@ src/**/*.png
 spec.pdf
 tmp/**
 knn_results
-cluster_results
