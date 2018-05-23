@@ -1,0 +1,19 @@
+#!/bin/bash
+
+
+PYTHON=python3.6
+
+DATA_DIR="../../dataset/C50train"
+
+### C50 Train ###
+echo "-- C50 Train --"
+# Stopwords
+(
+    echo "Cluster"
+    rm -r ../tmp/cluster_train
+    mkdir ../tmp/cluster_train
+    cd ../tmp/cluster_train
+    $PYTHON ../../src/textVectorizer.py --stopword ../../src/stopwords.txt $DATA_DIR truths.out vectors.csv > vocab.out
+    $PYTHON ../../src/clusteringAuthorship.py vectors.csv dendrogram.json
+    echo "Finished Cluster"
+) &
