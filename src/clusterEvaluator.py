@@ -62,12 +62,25 @@ def extract_clusters(root, num_clusters, min_size):
                     removal_count +=1
                     clusters.remove(node)
     return [gather(node) for node in clusters]
-
 #  This function is wrong -- I think the right solution is 
 #    1. Use BFS starting at the root to get list of size=num_clusters nodes
 #    2. Use the size function to remove clusters that are too small
 #    3. Repeat step 1 with the remaining clusters in place of the root
 #    4. End when you the remaining cluster list is >= num_clusters
+
+def extract_clusters_BFS(root, num_clusters, min_size):
+    clusters = [root]
+    while len(clusters) < num_clusters:
+        expandable = [n for n in clusters if n.node_type != 'LEAF']
+        if not expandable:
+            break
+        node = expandable[0]
+        clusters.remove(node)
+        clusters.append(node.data[0])
+        clusters.append(node.data[1])
+        if len(clusters) >= num_clusters:
+            clusters = [c for c in clusters if size(c) < min_size]
+    return [gather(node) for node in clusters]
 
 '''def extract_clusters(root, num_clusters, min_size):
     clusters = [root]
@@ -98,8 +111,8 @@ if __name__ == "__main__":
     print("-> loading dendrogram from ", args.dendrogram)
     with open(args.dendrogram, 'rb') as file:
        root  = pickle.load(file)
-    #print(size(root))
-    clusters = extract_clusters(root, 40, 2)
+    #clusters = extract_clusters(root, 40, 2)
+    clusters = extract_clusters_BFS(root, 50, 2)
     print(len(clusters))
 
     #with open(args.confusion_outfile, 'w') as file:
