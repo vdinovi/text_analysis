@@ -6,3 +6,4 @@ __pycache__
 src/**/*.png
 .DS_Store
 spec.pdf
+tmp/**
