@@ -7,3 +7,5 @@ src/**/*.png
 .DS_Store
 spec.pdf
 tmp/**
+knn_results
+cluster_results
