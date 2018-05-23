@@ -64,7 +64,7 @@ def chunks(l, n):
 
 def classify_vectors(knn, vectors, k):
     print("-> classifying input")
-    return [knn.classify(v, k) for v in vectors]
+    return [knn.classify(v, int(k)) for v in vectors]
 
 def write_results(filename, results):
     with open(filename, 'w') as file:
