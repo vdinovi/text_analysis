@@ -2,6 +2,7 @@ from textVectorizer import Vector, read_vectors, read_truths
 from link_methods import single_link, complete_link, average_link
 from argparse import ArgumentParser
 import numpy as np
+import pickle
 import sys
 import json
 import pdb
@@ -15,6 +16,7 @@ class Node:
         self.height = float(height)
 
     def to_dict(self):
+        # This needs to be NOT recursive -- reaches max recursion depth...
         node = {
             "type": self.node_type,
             "height": self.height,
@@ -69,6 +71,7 @@ if __name__ == "__main__":
     parser.add_argument("outfile", help="Write the resulting dendrogram to this file")
     parser.add_argument("--link-method", default="SINGLE", help="Specify link-method for agglomeration. Allowed values: SINGLE | COMPLETE | AVERAGE. By default SINGLE.")
     args = parser.parse_args()
+    sys.setrecursionlimit(5000)
 
     link_methods = {
         "SINGLE":   single_link,
@@ -80,6 +83,7 @@ if __name__ == "__main__":
     root = generate(dfs, vectors, link_methods[args.link_method])
     with open(args.outfile, 'w') as file:
         print("-> writing dendrogram to ", args.outfile)
-        file.write(json.dumps(root.to_dict(), indent=4, separators=(',', ': ')))
+        with open(args.outfile, 'wb') as file:
+            pickle.dump(root, file)
 
 
