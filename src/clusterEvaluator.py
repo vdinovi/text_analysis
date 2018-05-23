@@ -1,5 +1,6 @@
 from argparse import ArgumentParser
 from clusteringAuthorship import Node
+#from queue import Queue
 import pdb
 import json
 import sys
@@ -26,12 +27,49 @@ def size(node):
     else:
         return size(node.data[0]) + size(node.data[1])
 
+def addPQ(clusters,node):
+    idx = 0
+    s = size(node)
+    currSize = size(clusters[idx]) if len(clusters) > idx else 0
+    while idx < len(clusters) and s < currSize:
+        idx+=1
+        currSize = size(clusters[idx]) if len(clusters) > idx else 0
+    clusters.insert(idx,node)
+
+def extract_clusters(root, num_clusters, min_size):
+    clusters = [root]
+    while len(clusters) < num_clusters:
+        expandable = [n for n in clusters if n.node_type != 'LEAF']
+        if not expandable:
+            break
+        node = expandable[0]
+        s = size(node)
+        sl = size(node.data[0])
+        sr = size(node.data[1])
+        if(s < min_size):
+            break
+        #print("{} -> {},{}".format(s,sl,sr))
+        clusters.remove(node)
+        if sl >= min_size:
+            addPQ(clusters,node.data[0])
+        if sr >= min_size:
+            addPQ(clusters,node.data[1])
+        if len(clusters) >= num_clusters:
+            removal_count = 0
+            for node in clusters:
+                s = size(node)
+                if s < min_size:
+                    removal_count +=1
+                    clusters.remove(node)
+    return [gather(node) for node in clusters]
+
 #  This function is wrong -- I think the right solution is 
 #    1. Use BFS starting at the root to get list of size=num_clusters nodes
 #    2. Use the size function to remove clusters that are too small
 #    3. Repeat step 1 with the remaining clusters in place of the root
 #    4. End when you the remaining cluster list is >= num_clusters
-def extract_clusters(root, num_clusters, min_size):
+
+'''def extract_clusters(root, num_clusters, min_size):
     clusters = [root]
     while len(clusters) < num_clusters:
         expandable = [n for n in clusters if n.node_type != 'LEAF']
@@ -48,7 +86,7 @@ def extract_clusters(root, num_clusters, min_size):
             # reaches end without finding enough good sized clusters
             break
     return [gather(node) for node in clusters]
-
+'''
 
 if __name__ == "__main__":
     parser = ArgumentParser(description="Evaluates a Hierarchical clustering")
@@ -60,7 +98,8 @@ if __name__ == "__main__":
     print("-> loading dendrogram from ", args.dendrogram)
     with open(args.dendrogram, 'rb') as file:
        root  = pickle.load(file)
-    clusters = extract_clusters(root, 2, 1)
+    #print(size(root))
+    clusters = extract_clusters(root, 40, 2)
     print(len(clusters))
 
     #with open(args.confusion_outfile, 'w') as file:
