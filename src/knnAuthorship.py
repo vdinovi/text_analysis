@@ -77,9 +77,12 @@ def read_results(filename):
         print("-> reading results from ", filename)
         return [line.strip('\n') for line in file.readlines()]
 
+
+
 if __name__ == "__main__":
     parser = ArgumentParser(description="Generates a KNN classifer")
     parser.add_argument("datafile", help="Vectors to be classified")
+    parser.add_argument("--k", help="The number of nearest neighbors to check")
     parser.add_argument("--dist-method", help="The type of distance measure to use. Options: COSINE | OKAPI")
     parser.add_argument("--outfile", help="Write results of classification to a file")
     parser.add_argument("--save", help="Pickle the model to a file")
@@ -99,7 +102,7 @@ if __name__ == "__main__":
 
     dfs, vectors = read_vectors(args.datafile)
     vectors = vectors.values()
-    results = classify_vectors(knn, vectors, 5)
+    results = classify_vectors(knn, vectors, args.k or 5)
 
     if args.outfile:
         print("-> writing classication results to ", args.outfile)
