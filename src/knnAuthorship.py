@@ -47,21 +47,6 @@ class KNNClassifier:
                 dist_mat[j, i] = dist_mat[i, j]
         return indices, rev_indices, dist_mat
 
-def process_cosine_sim(outq, key, work, num_docs, dfs, vectors):
-    results = []
-    for item1 in work:
-        v = vectors[item1]
-        for item2, w in vectors.items():
-            if item1 != item2:
-                results.append(((item1, item2), v.cosine_sim(dfs, num_docs, w)))
-    outq.put(results)
-    print("   - ending process for authors in ", key)
-
-def chunks(l, n):
-    """Yield successive n-sized chunks from l."""
-    for i in range(0, len(l), n):
-        yield l[i:i + n]
-
 def classify_vectors(knn, vectors, k):
     print("-> classifying input")
     return [knn.classify(v, int(k)) for v in vectors]
