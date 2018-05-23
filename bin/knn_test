@@ -4,15 +4,15 @@ rm -rf ../tmp/*
 
 PYTHON=python3.6
 
-DATA_DIR="../../dataset/small"
+DATA_DIR="../../dataset/C50test"
 
 ### C50 Train ###
-echo "-- C50 Train --"
+echo "-- C50 Test --"
 # Nothing
 (
     echo "Nothing"
-    mkdir ../tmp/C50train
-    cd ../tmp/C50train
+    mkdir ../tmp/C50test
+    cd ../tmp/C50test
     $PYTHON ../../src/textVectorizer.py $DATA_DIR truths.out vectors.csv > vocab.out
     time $PYTHON ../../src/knnAuthorship.py --save model.pickle --outfile result.out vectors.csv > work.out
     $PYTHON ../../src/classifierEvaluator.py truths.out result.out conf.csv > stats.out
@@ -21,19 +21,19 @@ echo "-- C50 Train --"
 # Stopwords
 (
     echo "Stopwords"
-    mkdir ../tmp/C50train_stop
-    cd ../tmp/C50train_stop
-    $PYTHON ../../src/textVectorizer.py $DATA_DIR truths.out vectors.csv > vocab.out
+    mkdir ../tmp/C50test_stop
+    cd ../tmp/C50test_stop
+    $PYTHON ../../src/textVectorizer.py --stopword ../../src/stopwords.txt $DATA_DIR truths.out vectors.csv > vocab.out
     time $PYTHON ../../src/knnAuthorship.py --save model.pickle --outfile result.out vectors.csv > work.out
     $PYTHON ../../src/classifierEvaluator.py truths.out result.out conf.csv > stats.out
-    echo "Finished Nothing"
+    echo "Finished Stopwords"
 ) &
 # Stemming
 (
     echo "Stemming"
-    mkdir ../tmp/C50train_stem
-    cd ../tmp/C50train_stem
-    $PYTHON ../../src/textVectorizer.py $DATA_DIR truths.out vectors.csv > vocab.out
+    mkdir ../tmp/C50test_stem
+    cd ../tmp/C50test_stem
+    $PYTHON ../../src/textVectorizer.py --stemming $DATA_DIR truths.out vectors.csv > vocab.out
     time $PYTHON ../../src/knnAuthorship.py --save model.pickle --outfile result.out vectors.csv > work.out
     $PYTHON ../../src/classifierEvaluator.py truths.out result.out conf.csv > stats.out
     echo "Finished Stemming"
@@ -41,9 +41,9 @@ echo "-- C50 Train --"
 # Stopwords and Stemming
 (
     echo "Both"
-    mkdir ../tmp/C50train_stop_stem
-    cd ../tmp/C50train_stop_stem
-    $PYTHON ../../src/textVectorizer.py $DATA_DIR truths.out vectors.csv > vocab.out
+    mkdir ../tmp/C50test_stop_stem
+    cd ../tmp/C50test_stop_stem
+    $PYTHON ../../src/textVectorizer.py --stopword ../../src/stopwords.txt --stemming $DATA_DIR truths.out vectors.csv > vocab.out
     time $PYTHON ../../src/knnAuthorship.py --save model.pickle --outfile result.out vectors.csv > work.out
     $PYTHON ../../src/classifierEvaluator.py truths.out result.out conf.csv > stats.out
     echo "Finished Both"

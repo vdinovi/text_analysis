@@ -43,8 +43,8 @@ class Vector:
                 accum += doc_freq * other_tf * self_tf
         return accum
 
-def read_stopwords():
-    with open("stopwords.txt", "r") as file:
+def read_stopwords(filename):
+    with open(filename, "r") as file:
         return set(file.read().split("\n"))
 
 def parse_datadir(dirname, stopword, stemming):
@@ -55,7 +55,7 @@ def parse_datadir(dirname, stopword, stemming):
     data = {}
     num_docs = 0
     if stopword:
-        stopwords = read_stopwords()
+        stopwords = read_stopwords(stopword)
     if stemming:
         stemmer = PorterStemmer()
     # Filter out words containing invalid characters
@@ -152,7 +152,7 @@ if __name__ == "__main__":
     parser.add_argument("datadir", help="The location of the Reuters 50-50 dataset")
     parser.add_argument("truths", help="The name of the output file for truths")
     parser.add_argument("outfile", help="The name of the output file containing tf-idf vectors (the ground truth filename will also be derived from this")
-    parser.add_argument("--stopword", action="store_true", help="Include stopword removal")
+    parser.add_argument("--stopword", help="Include stopword removal")
     parser.add_argument("--stemming", action="store_true", help="Include word stemming")
     args = parser.parse_args()
 

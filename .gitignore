@@ -10,3 +10,4 @@ spec.pdf
 out
 *.pickle
 *.out
+tmp
