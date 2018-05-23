@@ -1,0 +1,7 @@
+-> generating model from  vectors.csv
+-> reading vectors from  vectors.csv
+-> generating model
+-> saving knn to  model.pickle
+-> reading vectors from  vectors.csv
+-> classifying input
+-> writing classication results to  result.out

@@ -1,0 +1,5 @@
+-> calculating vectors from  ../../dataset/C50train
+  Vocab Size: 52066
+  Num Docs:   2500
+-> writing vectors to  vectors.csv
+-> writing ground truths to  truths.out
