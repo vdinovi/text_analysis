@@ -1,6 +1,4 @@
 #!/bin/bash
-rm -rf ../tmp/*
-
 
 PYTHON=python3.6
 
@@ -11,6 +9,7 @@ echo "-- C50 Train --"
 # Nothing
 (
     echo "Nothing"
+    rm -r ../tmp/C50train
     mkdir ../tmp/C50train
     cd ../tmp/C50train
     $PYTHON ../../src/textVectorizer.py $DATA_DIR truths.out vectors.csv > vocab.out
@@ -21,6 +20,7 @@ echo "-- C50 Train --"
 # Stopwords
 (
     echo "Stopwords"
+    rm -r ../tmp/C50train_stop
     mkdir ../tmp/C50train_stop
     cd ../tmp/C50train_stop
     $PYTHON ../../src/textVectorizer.py --stopword ../../src/stopwords.txt $DATA_DIR truths.out vectors.csv > vocab.out
@@ -31,6 +31,7 @@ echo "-- C50 Train --"
 # Stemming
 (
     echo "Stemming"
+    rm -r ../tmp/C50train_stem
     mkdir ../tmp/C50train_stem
     cd ../tmp/C50train_stem
     $PYTHON ../../src/textVectorizer.py --stemming $DATA_DIR truths.out vectors.csv > vocab.out
@@ -41,6 +42,7 @@ echo "-- C50 Train --"
 # Stopwords and Stemming
 (
     echo "Both"
+    rm -r ../tmp/C50train_stop_stem
     mkdir ../tmp/C50train_stop_stem
     cd ../tmp/C50train_stop_stem
     $PYTHON ../../src/textVectorizer.py --stopword ../../src/stopwords.txt --stemming $DATA_DIR truths.out vectors.csv > vocab.out
