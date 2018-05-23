@@ -1,44 +1,49 @@
 #!/bin/bash
 rm -rf ../tmp/*
-cd ../tmp
+
+PYTHON=python3.6
 
 DATA_DIR="../../dataset/small"
 
 ### C50 Train ###
 echo "-- C50 Train --"
 # Nothing
-echo "Nothing"
 (
-    mkdir C50train
-    cd C50train
-    python3 ../../src/textVectorizer.py $DATA_DIR truths.out vectors.csv > vocab.out
-    time python3 ../../src/knnAuthorship.py --save model.pickle --outfile small.out vectors.csv > work.out
-    python3 ../../src/classifierEvaluator.py truths.out result.out conf.csv > stats.out
+    echo "Nothing"
+    mkdir ../tmp/C50train
+    cd ../tmp/C50train
+    $PYTHON ../../src/textVectorizer.py $DATA_DIR truths.out vectors.csv > vocab.out
+    time $PYTHON ../../src/knnAuthorship.py --save model.pickle --outfile result.out vectors.csv > work.out
+    $PYTHON ../../src/classifierEvaluator.py truths.out result.out conf.csv > stats.out
+    echo "Finished Nothing"
 ) &
 # Stopwords
-echo "Stopwords"
 (
-    mkdir C50train_stop
-    cd C50train_stop
-    python3 ../../src/textVectorizer.py $DATA_DIR truths.out vectors.csv > vocab.out
-    time python3 ../../src/knnAuthorship.py --save model.pickle --outfile small.out vectors.csv > work.out
-    python3 ../../src/classifierEvaluator.py truths.out result.out conf.csv > stats.out
+    echo "Stopwords"
+    mkdir ../tmp/C50train_stop
+    cd ../tmp/C50train_stop
+    $PYTHON ../../src/textVectorizer.py $DATA_DIR truths.out vectors.csv > vocab.out
+    time $PYTHON ../../src/knnAuthorship.py --save model.pickle --outfile result.out vectors.csv > work.out
+    $PYTHON ../../src/classifierEvaluator.py truths.out result.out conf.csv > stats.out
+    echo "Finished Nothing"
 ) &
 # Stemming
-echo "Stemming"
 (
-    mkdir C50train_stem
-    cd C50train_stem
-    python3 ../../src/textVectorizer.py $DATA_DIR truths.out vectors.csv > vocab.out
-    time python3 ../../src/knnAuthorship.py --save model.pickle --outfile small.out vectors.csv > work.out
-    python3 ../../src/classifierEvaluator.py truths.out result.out conf.csv > stats.out
+    echo "Stemming"
+    mkdir ../tmp/C50train_stem
+    cd ../tmp/C50train_stem
+    $PYTHON ../../src/textVectorizer.py $DATA_DIR truths.out vectors.csv > vocab.out
+    time $PYTHON ../../src/knnAuthorship.py --save model.pickle --outfile result.out vectors.csv > work.out
+    $PYTHON ../../src/classifierEvaluator.py truths.out result.out conf.csv > stats.out
+    echo "Finished Stemming"
 ) &
 # Stopwords and Stemming
-echo "Both"
 (
-    mkdir C50train_stop_stem
-    cd C50train_stop_stem
-    python3 ../../src/textVectorizer.py $DATA_DIR truths.out vectors.csv > vocab.out
-    time python3 ../../src/knnAuthorship.py --save model.pickle --outfile small.out vectors.csv > work.out
-    python3 ../../src/classifierEvaluator.py truths.out result.out conf.csv > stats.out
+    echo "Both"
+    mkdir ../tmp/C50train_stop_stem
+    cd ../tmp/C50train_stop_stem
+    $PYTHON ../../src/textVectorizer.py $DATA_DIR truths.out vectors.csv > vocab.out
+    time $PYTHON ../../src/knnAuthorship.py --save model.pickle --outfile result.out vectors.csv > work.out
+    $PYTHON ../../src/classifierEvaluator.py truths.out result.out conf.csv > stats.out
+    echo "Finished Both"
 ) &
