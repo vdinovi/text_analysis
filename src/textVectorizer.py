@@ -25,7 +25,7 @@ class Vector:
             self_denom += (freq * idf) ** 2
         for word, freq in other.tfs.items():
             other_denom += (other.tfs[word] * idf) ** 2
-        return float(numerator) / math.sqrt(self_denom * other_denom)
+        return float(numerator) / (math.sqrt(self_denom * other_denom) or 0.000000001)
 
     def okapi(self, dfs, num_docs, avg_dl, other):
         k1 = 1.5
@@ -61,7 +61,7 @@ def parse_datadir(dirname, stopword, stemming):
     # Filter out words containing invalid characters
     wf = re.compile(".*[0-9\`\@\#\$\%\^\&\*\+\_\{\}\[\]]+.*")
     # Generate
-    print("-> calculating model from ", dirname)
+    print("-> calculating vectors from ", dirname)
     for author in listdir(dirname):
         data[author] = {}
         for document in listdir(dirname + '/' + author):
@@ -104,9 +104,9 @@ def parse_datadir(dirname, stopword, stemming):
 # Stores doc-freqs and tf-vectors in the form:
 #   w1,df1,w2,df2,...                     <-- doc freqs per word
 #   Author,Document,vw1,vfw1,vw2,vfw2,... <-- sparse vector format
-def write_model(filename, dfs, vectors):
+def write_vectors(filename, dfs, vectors):
     with open(filename, 'w') as file:
-        print("-> writing model to ", filename)
+        print("-> writing vectors to ", filename)
         writer = csv.writer(file)
         # Write doc freqs for all words in vocab
         row = reduce(lambda a, b: a + b, [[word, df] for word, df in dfs.items()])
@@ -116,11 +116,11 @@ def write_model(filename, dfs, vectors):
             row = reduce(lambda a, b: a + b, [[word, freq] for word, freq in v.tfs.items()])
             writer.writerow([v.label[0], v.label[1]] + row)
 
-def read_model(filename):
+def read_vectors(filename):
     vectors = {}
     dfs = {}
     with open(filename, 'r') as file:
-        print("-> reading model from ", filename)
+        print("-> reading vectors from ", filename)
         reader = csv.reader(file)
         row = next(reader)
         # Read doc freqs
@@ -150,6 +150,7 @@ def read_truths(filename):
 if __name__ == "__main__":
     parser = ArgumentParser(description="A text vectorizer -- produces a file of vectorized tf-idf documents and a ground truth file from the Reuter 50-50 dataset.")
     parser.add_argument("datadir", help="The location of the Reuters 50-50 dataset")
+    parser.add_argument("truths", help="The name of the output file for truths")
     parser.add_argument("outfile", help="The name of the output file containing tf-idf vectors (the ground truth filename will also be derived from this")
     parser.add_argument("--stopword", action="store_true", help="Include stopword removal")
     parser.add_argument("--stemming", action="store_true", help="Include word stemming")
@@ -157,7 +158,7 @@ if __name__ == "__main__":
 
     # generate ground-truths and corresponding vectors as parallel lists
     labels, dfs, vectors = parse_datadir(args.datadir, args.stopword, args.stemming)
-    write_model(args.outfile, dfs, vectors)
-    write_truths(args.outfile.split('.')[0] + "_truths.csv", labels)
+    write_vectors(args.outfile, dfs, vectors)
+    write_truths(args.truths, labels)
 
 

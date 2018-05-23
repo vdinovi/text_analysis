@@ -1,0 +1,56 @@
+#!/bin/bash
+rm -rf ../tmp/*
+cd ../tmp
+
+### C50 Train ###
+echo "-- C50 Train --"
+# Nothing
+echo "Nothing"
+mkdir C50train
+(
+    cd C50train
+    echo "  vectorizing.."
+    python3 ../../src/textVectorizer.py ../../dataset/C50train truths.out vectors.csv > vocab.out
+    echo "  building.."
+    time python3 ../../src/knnAuthorship.py --save model.pickle --outfile small.out vectors.csv > work.out
+    echo "  evaluating.."
+    python3 ../../src/classifierEvaluator.py truths.out result.out conf.csv > stats.out
+)
+exit
+
+# Stopwords
+echo "Stopwords"
+mkdir C50train_stop
+(
+    cd C50train_stop
+    echo "  vectorizing.."
+    python3 ../../src/textVectorizer.py ../../dataset/C50train truths.out vectors.csv > vocab.out
+    echo "  building.."
+    time python3 ../../src/knnAuthorship.py --save model.pickle --outfile small.out vectors.csv > work.out
+    echo "  evaluating.."
+    python3 ../../src/classifierEvaluator.py truths.out result.out conf.csv > stats.out
+)
+# Stemming
+echo "Stemming"
+mkdir C50train_stop
+(
+    cd C50train_stem
+    echo "  vectorizing.."
+    python3 ../../src/textVectorizer.py ../../dataset/C50train truths.out vectors.csv > vocab.out
+    echo "  building.."
+    time python3 ../../src/knnAuthorship.py --save model.pickle --outfile small.out vectors.csv > work.out
+    echo "  evaluating.."
+    python3 ../../src/classifierEvaluator.py truths.out result.out conf.csv > stats.out
+)
+# Stopwords and Stemming
+echo "Both"
+mkdir C50train_stop_stem
+(
+    cd C50train_stop_stem
+    echo "  vectorizing.."
+    python3 ../../src/textVectorizer.py ../../dataset/C50train truths.out vectors.csv > vocab.out
+    echo "  building.."
+    time python3 ../../src/knnAuthorship.py --save model.pickle --outfile small.out vectors.csv > work.out
+    echo "  evaluating.."
+    python3 ../../src/classifierEvaluator.py truths.out result.out conf.csv > stats.out
+)

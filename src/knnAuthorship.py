@@ -1,7 +1,6 @@
 from argparse import ArgumentParser
-from textVectorizer import Vector, read_model, read_truths
+from textVectorizer import Vector, read_vectors, read_truths
 import numpy as np
-from multiprocessing import Process, Queue
 import pickle
 import string
 import pdb
@@ -26,11 +25,12 @@ class KNNClassifier:
         assert(dist_method in ['COSINE', 'OKAPI'])
 
         print("-> generating model from ", data_filename)
-        dfs, vectors = read_model(data_filename)
+        dfs, vectors = read_vectors(data_filename)
         if dist_method == 'COSINE':
             indices, rev_indices, dist_mat = cls.generate_cosine_sim_mat(dfs, vectors)
         else:
-            indices, rev_indices, dist_mat = cls.generate_okapi_mat(dfs, vectors)
+            #indices, rev_indices, dist_mat = cls.generate_okapi_mat(dfs, vectors)
+            indices, rev_indices, dist_mat = cls.generate_cosine_sim_mat(dfs, vectors)
         return KNNClassifier(dist_method, dist_mat, indices, rev_indices)
 
     @staticmethod
@@ -40,56 +40,11 @@ class KNNClassifier:
         dist_mat = np.zeros(shape=(len(indices), len(indices)))
         num_docs = len(vectors)
 
-        # Parellelize the work by authors
-        procs = []
-        proc_keys = {l for l in chunks(string.ascii_lowercase, len(string.ascii_lowercase) // 4)}
-        result_q = Queue()
-        for key in proc_keys:
-            work = [(index[0], index[1]) for index in indices if index[0][0].lower() in key]
-            if not work:
-                continue
-            proc = Process(target=process_cosine_sim, args=(result_q, key, work, num_docs, dfs, vectors))
-            procs.append(proc)
-            print("   + spawning process for authors in ", key)
-            proc.start()
-        # Consume from workers
-        for _ in range(len(procs)):
-            for res in result_q.get():
-                dist_mat[rev_indices[res[0][0]], rev_indices[res[0][1]]] = res[1]
-                dist_mat[rev_indices[res[0][1]], rev_indices[res[0][0]]] = res[1]
-        for proc in procs:
-            proc.join()
-
-        return indices, rev_indices, dist_mat
-
-    @staticmethod
-    def generate_okapi_mat(dfs, vectors):
-        indices = [v for v in vectors]
-        rev_indices = {indices[i]: i for i in range(0, len(indices))}
-        dist_mat = np.zeros(shape=(len(indices), len(indices)))
-        num_docs = len(vectors)
-        avg_doc_length = sum([len(v.tfs) for v in vectors.values()]) / float(len(vectors))
-
-        # Parellelize the work by authors
-        procs = []
-        proc_keys = {l for l in chunks(string.ascii_lowercase, len(string.ascii_lowercase) // 4)}
-        result_q = Queue()
-        for key in proc_keys:
-            work = [(index[0], index[1]) for index in indices if index[0][0].lower() in key]
-            if not work:
-                continue
-            proc = Process(target=process_okapi, args=(result_q, key, work, num_docs, avg_doc_length, dfs, vectors))
-            procs.append(proc)
-            print("   + spawning process for authors in ", key)
-            proc.start()
-        # Consume from workers
-        for _ in range(len(procs)):
-            for res in result_q.get():
-                dist_mat[rev_indices[res[0][0]], rev_indices[res[0][1]]] = res[1]
-                dist_mat[rev_indices[res[0][1]], rev_indices[res[0][0]]] = res[1]
-        for proc in procs:
-            proc.join()
-
+        print("-> generating model")
+        for i in range(0, len(dist_mat)):
+            for j in range(i + 1, len(dist_mat)):
+                dist_mat[i, j] = vectors[indices[i]].cosine_sim(dfs, num_docs, vectors[indices[j]])
+                dist_mat[j, i] = dist_mat[i, j]
         return indices, rev_indices, dist_mat
 
 def process_cosine_sim(outq, key, work, num_docs, dfs, vectors):
@@ -99,16 +54,6 @@ def process_cosine_sim(outq, key, work, num_docs, dfs, vectors):
         for item2, w in vectors.items():
             if item1 != item2:
                 results.append(((item1, item2), v.cosine_sim(dfs, num_docs, w)))
-    outq.put(results)
-    print("   - ending process for authors in ", key)
-
-def process_okapi(outq, key, work, num_docs, avg_dl, dfs, vectors):
-    results = []
-    for item1 in work:
-        v = vectors[item1]
-        for item2, w in vectors.items():
-            if item1 != item2:
-                results.append(((item1, item2), v.okapi(dfs, num_docs, avg_dl, w)))
     outq.put(results)
     print("   - ending process for authors in ", key)
 
@@ -152,8 +97,8 @@ if __name__ == "__main__":
         with open(args.save, 'wb') as file:
             pickle.dump(knn, file)
 
-    dfs, model = read_model(args.datafile)
-    vectors = model.values()
+    dfs, vectors = read_vectors(args.datafile)
+    vectors = vectors.values()
     results = classify_vectors(knn, vectors, 5)
 
     if args.outfile:
