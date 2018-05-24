@@ -68,6 +68,7 @@ if __name__ == "__main__":
     truths = read_truths(args.truthfile)
     results = read_results(args.resultfile)
     # calculate stats
+    pdb.set_trace()
     authors = parse_results(truths, results)
     conf_mat = confusion_matrix(authors, truths, results)
     eval_precision_recall(authors, conf_mat)

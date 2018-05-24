@@ -1,6 +1,6 @@
 from argparse import ArgumentParser
 from clusteringAuthorship import Node
-#from queue import Queue
+from textVectorizer import read_truths
 import pdb
 import json
 import sys
@@ -62,12 +62,11 @@ def extract_clusters(root, num_clusters, min_size):
                     removal_count +=1
                     clusters.remove(node)
     return [gather(node) for node in clusters]
-#  This function is wrong -- I think the right solution is 
+
 #    1. Use BFS starting at the root to get list of size=num_clusters nodes
 #    2. Use the size function to remove clusters that are too small
 #    3. Repeat step 1 with the remaining clusters in place of the root
 #    4. End when you the remaining cluster list is >= num_clusters
-
 def extract_clusters_BFS(root, num_clusters, min_size):
     clusters = [root]
     while len(clusters) < num_clusters:
@@ -82,38 +81,125 @@ def extract_clusters_BFS(root, num_clusters, min_size):
             clusters = [c for c in clusters if size(c) < min_size]
     return [gather(node) for node in clusters]
 
-'''def extract_clusters(root, num_clusters, min_size):
-    clusters = [root]
-    while len(clusters) < num_clusters:
-        expandable = [n for n in clusters if n.node_type != 'LEAF']
-        if not expandable:
-            break
-        node = expandable[0]
-        clusters.remove(node)
-        clusters.append(node.data[0])
-        clusters.append(node.data[1])
-        for node in clusters:
-            if size(node) < min_size:
-                clusters.remove(node)
-        if not len(clusters):
-            # reaches end without finding enough good sized clusters
-            break
-    return [gather(node) for node in clusters]
-'''
+def ClusterNames(clusters,truths):
+    data={key:{'hits': 0, 'misses': 0, 'strikes': 0,'clusters':[],'expected': len([a for a in truths if a == key])} for key in set(truths)}
+    names = []
+    totalCorrect=0
+    totalIncorrect=0
+    for i in range(len(clusters)):
+        cluster = clusters[i]
+        d = {}
+        for item in cluster:
+            if item[0] in d:
+                d[item[0]]+=1
+            else:
+                d[item[0]]=1
+        bestName = max(d, key=lambda key: d[key])
+        names.append(bestName)
+        data[bestName]['clusters'].append(i)
+    for i in range(len(clusters)):
+        cluster = clusters[i]
+        clusterName = names[i]
+        for item in cluster:
+            name = item[0]
+            if name == clusterName:
+                data[clusterName]['hits']+=1
+                totalCorrect+=1
+            else:
+                data[clusterName]['strikes']+=1
+                data[name]['misses']+=1
+                totalIncorrect+=1
+    return names,data,totalCorrect,totalIncorrect
+        # hits - Same as true positives
+        # misses - same as false negatives
+        # strikes - same as false positives
+        # TP - items that match their cluster
+        # FP - items that don't match their cluster
+        # TN - items that aren't in the cluster that do shouldn't be there
+        # FN - items that aren't in the cluster that should be
+
+def test_all(root):
+    vals=[2,5,10,20,35,50]
+    for i in vals:
+        print("--testing for min_size={}".format(i))
+        down=True
+        j = 50
+        while(1):
+            if j==1:
+                print("Unable to find any clusters...")
+                break
+            clusters = extract_clusters(root,j,i)
+            print("    for {} clusters requested: {} found".format(j,len(clusters)))
+            if len(clusters) > 0:
+                if j == 50:
+                    print("found {} clusters".format(len(clusters)))
+                    break
+                down=False
+            if down:
+                j -= j//2
+            else:
+                if len(clusters) <= 0:
+                    print("      Final answer: {} clusters".format(j-1))
+                    break
+                j += 1
+
+def precision(clusterDatum):
+    # TP/(TP+FP)
+    TP = float(clusterDatum['hits'])
+    FP = float(clusterDatum['misses'])
+    if (TP+FP) == 0:
+        return 0
+    return TP/(TP+FP)
+
+def recall(clusterDatum):
+    # TP/(TP+FN)
+    TP = float(clusterDatum['hits'])
+    FN = float(clusterDatum['strikes'])
+    if (TP+FN) == 0:
+        return 0
+    return TP/(TP+FN)
+
+def fmeasure(clusterDatum,beta=None):
+    if beta==None:
+        beta = 1
+    p=precision(clusterDatum)
+    r=recall(clusterDatum)
+    if (beta**2)*p+r == 0:
+        return 0
+    return (1+beta**2)*((p*r)/((beta**2)*p+r))
+
+def printDatum(name,cd):
+    h,s,m = (cd['hits'],cd['strikes'],cd['misses'])
+    p = precision(cd)
+    r = recall(cd)
+    f = fmeasure(cd)
+    print("  - {}".format(name))
+    print("      hits = {}, strikes = {}, misses = {}".format(h,s,m))
+    print("      precision = {:8.4f}, recall = {:8.4f}, f-measure = {:8.4f}".format(p,r,f))
 
 if __name__ == "__main__":
     parser = ArgumentParser(description="Evaluates a Hierarchical clustering")
     parser.add_argument("dendrogram", help="File containing the dendogram in JSON format")
-    #parser.add_argument("outfile", help="Filename for the confusion matrix output")
+    parser.add_argument("truthfile", help="Actual truth classes")
+    #parser.add_argument("outfile", help="Resulting classes from the classifier")
+    #parser.add_argument("confusion_outfile", help="Filename for the confusion matrix output")
     args = parser.parse_args()
-    sys.setrecursionlimit(2000)
+    sys.setrecursionlimit(3000)
 
     print("-> loading dendrogram from ", args.dendrogram)
     with open(args.dendrogram, 'rb') as file:
        root  = pickle.load(file)
-    #clusters = extract_clusters(root, 40, 2)
-    clusters = extract_clusters_BFS(root, 50, 2)
-    print(len(clusters))
-
+    truths = read_truths(args.truthfile)
+    #test_all(root)
+    clusters = extract_clusters(root, 50,2)
+    clusterNames,clusterData,tc,ti = ClusterNames(clusters,truths)
+    #pdb.set_trace()
+    print("-- Evaluation Results --")
+    print("Total correct:    {}".format(tc))
+    print("Total incorrect:  {}".format(ti))
+    print("Overall accuracy: {}".format(float(tc)/(tc+ti)))
+    print("Authors:")
+    for key in clusterData:
+        printDatum(key,clusterData[key])
     #with open(args.confusion_outfile, 'w') as file:
     #    print("-> writing results to ", args.outfile)

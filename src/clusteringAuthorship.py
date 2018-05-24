@@ -71,6 +71,7 @@ if __name__ == "__main__":
     parser = ArgumentParser(description="Generates a hierarchical cluster dendrogram")
     parser.add_argument("datafile", help="Vectors to be clustered")
     parser.add_argument("outfile", help="Write the resulting dendrogram to this file")
+    parser.add_argument("--load", help="Load a pickled model from a file")
     parser.add_argument("--link-method", default="SINGLE", help="Specify link-method for agglomeration. Allowed values: SINGLE | COMPLETE | AVERAGE. By default SINGLE.")
     args = parser.parse_args()
     sys.setrecursionlimit(25000)
@@ -79,9 +80,13 @@ if __name__ == "__main__":
         "COMPLETE": complete_link,
         "AVERAGE":  average_link
     }
-
-    dfs, vectors = read_vectors(args.datafile)
-    root = generate(dfs, vectors, link_methods[args.link_method])
+    if args.load:
+        print("-> loading clusters from ", args.load)
+        with open(args.load, 'rb') as file:
+            root = pickle.load(file)
+    else:
+        dfs, vectors = read_vectors(args.datafile)
+        root = generate(dfs, vectors, link_methods[args.link_method])
     with open(args.outfile, 'w') as file:
         print("-> writing dendrogram to ", args.outfile)
         with open(args.outfile, 'wb') as file:
