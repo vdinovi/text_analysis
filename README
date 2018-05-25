@@ -1,9 +1,11 @@
+Vittorio Dinovi - vdinovi@calpoly.edu
+Billy Gottenstrater - wgottens@calpoly.edu
 
--- KNN --
+
+Use the -h switch on any file to see detailed descriptions
+
 python3 textVectorizer.py  [--stopword STOPWORD] [--stemming] DATA_DIR TRUTHS_FILE VECTORS_FILE
 python3 knnAuthorship.py VECTORS_FILE [--dist-method 'COSINE' | 'OKAPI'] [--save model.pickle] [--load model.pickle] [--outfile RESULT_OUTFILE
 python3 classifierEvaluator.py TRUTHS_FILE RESULTS_FILE CONF_MATRIX_FILE
- 
- 
- -- H. Clustering --
- 
+python3 clusteringAuthorship.py [--load LOAD] [--link-method LINK_METHOD] VECTORS_FILE DENDROGRAM_FILE
+python3 clusterEvaluator.py DENDROGRAM_FILE TRUTHS_FILE
