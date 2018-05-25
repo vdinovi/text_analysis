@@ -1,6 +1,7 @@
 Vittorio Dinovi - vdinovi@calpoly.edu
 Billy Gottenstrater - wgottens@calpoly.edu
 
+# Usage
 
 Use the -h switch on any file to see detailed descriptions
 
@@ -9,3 +10,7 @@ python3 knnAuthorship.py VECTORS_FILE [--dist-method 'COSINE' | 'OKAPI'] [--save
 python3 classifierEvaluator.py TRUTHS_FILE RESULTS_FILE CONF_MATRIX_FILE
 python3 clusteringAuthorship.py [--load LOAD] [--link-method LINK_METHOD] VECTORS_FILE DENDROGRAM_FILE
 python3 clusterEvaluator.py DENDROGRAM_FILE TRUTHS_FILE
+
+# Results
+results for both methods are included in the results directory
+

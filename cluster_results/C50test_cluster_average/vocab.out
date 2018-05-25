@@ -1,5 +1,0 @@
--> calculating vectors from  ../../dataset/C50test
-  Vocab Size: 52949
-  Num Docs:   2500
--> writing vectors to  vectors.csv
--> writing ground truths to  truths.out

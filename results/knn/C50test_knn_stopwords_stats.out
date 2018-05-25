@@ -1,0 +1,158 @@
+-> reading ground truths from  truths.out
+-> reading results from  result.out
+-- Evaluation Results --
+Total Correct:    1560
+Total Incorrect:  940
+Overall Accuracy: 0.6240
+Authors:
+  - ScottHillis:
+      hits = 19,  strikes = 24,  misses = 31
+      precision = 0.4419,  recall = 0.3800,  f-measure = 0.4086
+  - DarrenSchuettler:
+      hits = 39,  strikes = 30,  misses = 11
+      precision = 0.5179,  recall = 0.5800,  f-measure = 0.5472
+  - RogerFillion:
+      hits = 37,  strikes = 3,  misses = 13
+      precision = 0.6250,  recall = 0.6333,  f-measure = 0.6291
+  - JoWinterbottom:
+      hits = 47,  strikes = 18,  misses = 3
+      precision = 0.6544,  recall = 0.7100,  f-measure = 0.6811
+  - MichaelConnor:
+      hits = 40,  strikes = 8,  misses = 10
+      precision = 0.6868,  recall = 0.7280,  f-measure = 0.7068
+  - KirstinRidley:
+      hits = 32,  strikes = 6,  misses = 18
+      precision = 0.7063,  recall = 0.7133,  f-measure = 0.7098
+  - SamuelPerry:
+      hits = 28,  strikes = 95,  misses = 22
+      precision = 0.5681,  recall = 0.6914,  f-measure = 0.6237
+  - PatriciaCommins:
+      hits = 21,  strikes = 12,  misses = 29
+      precision = 0.5730,  recall = 0.6575,  f-measure = 0.6123
+  - BernardHickey:
+      hits = 28,  strikes = 5,  misses = 22
+      precision = 0.5915,  recall = 0.6467,  f-measure = 0.6178
+  - JaneMacartney:
+      hits = 14,  strikes = 25,  misses = 36
+      precision = 0.5744,  recall = 0.6100,  f-measure = 0.5917
+  - EricAuchard:
+      hits = 25,  strikes = 50,  misses = 25
+      precision = 0.5446,  recall = 0.6000,  f-measure = 0.5709
+  - MartinWolk:
+      hits = 28,  strikes = 32,  misses = 22
+      precision = 0.5375,  recall = 0.5967,  f-measure = 0.5656
+  - HeatherScoffield:
+      hits = 25,  strikes = 24,  misses = 25
+      precision = 0.5357,  recall = 0.5892,  f-measure = 0.5612
+  - AlexanderSmith:
+      hits = 24,  strikes = 11,  misses = 26
+      precision = 0.5427,  recall = 0.5814,  f-measure = 0.5614
+  - AaronPressman:
+      hits = 44,  strikes = 6,  misses = 6
+      precision = 0.5637,  recall = 0.6013,  f-measure = 0.5819
+  - EdnaFernandes:
+      hits = 34,  strikes = 13,  misses = 16
+      precision = 0.5726,  recall = 0.6062,  f-measure = 0.5889
+  - JonathanBirt:
+      hits = 28,  strikes = 3,  misses = 22
+      precision = 0.5843,  recall = 0.6035,  f-measure = 0.5938
+  - BenjaminKangLim:
+      hits = 18,  strikes = 30,  misses = 32
+      precision = 0.5734,  recall = 0.5900,  f-measure = 0.5816
+  - ToddNissen:
+      hits = 29,  strikes = 6,  misses = 21
+      precision = 0.5827,  recall = 0.5895,  f-measure = 0.5861
+  - SimonCowell:
+      hits = 42,  strikes = 5,  misses = 8
+      precision = 0.5972,  recall = 0.6020,  f-measure = 0.5996
+  - LynnleyBrowning:
+      hits = 48,  strikes = 15,  misses = 2
+      precision = 0.6069,  recall = 0.6190,  f-measure = 0.6129
+  - MarkBendeich:
+      hits = 31,  strikes = 5,  misses = 19
+      precision = 0.6152,  recall = 0.6191,  f-measure = 0.6171
+  - KouroshKarimkhany:
+      hits = 43,  strikes = 68,  misses = 7
+      precision = 0.5944,  recall = 0.6296,  f-measure = 0.6115
+  - TanEeLyn:
+      hits = 40,  strikes = 53,  misses = 10
+      precision = 0.5828,  recall = 0.6367,  f-measure = 0.6085
+  - DavidLawder:
+      hits = 38,  strikes = 23,  misses = 12
+      precision = 0.5845,  recall = 0.6416,  f-measure = 0.6117
+  - KevinMorrison:
+      hits = 36,  strikes = 37,  misses = 14
+      precision = 0.5799,  recall = 0.6446,  f-measure = 0.6106
+  - JimGilchrist:
+      hits = 25,  strikes = 5,  misses = 25
+      precision = 0.5851,  recall = 0.6393,  f-measure = 0.6110
+  - MatthewBunce:
+      hits = 40,  strikes = 0,  misses = 10
+      precision = 0.5960,  recall = 0.6450,  f-measure = 0.6196
+  - PierreTran:
+      hits = 31,  strikes = 6,  misses = 19
+      precision = 0.6018,  recall = 0.6441,  f-measure = 0.6223
+  - LynneO'Donnell:
+      hits = 39,  strikes = 16,  misses = 11
+      precision = 0.6055,  recall = 0.6487,  f-measure = 0.6263
+  - WilliamKazer:
+      hits = 10,  strikes = 23,  misses = 40
+      precision = 0.5994,  recall = 0.6342,  f-measure = 0.6163
+  - JohnMastrini:
+      hits = 29,  strikes = 11,  misses = 21
+      precision = 0.6024,  recall = 0.6325,  f-measure = 0.6171
+  - MureDickie:
+      hits = 12,  strikes = 6,  misses = 38
+      precision = 0.6031,  recall = 0.6206,  f-measure = 0.6117
+  - TheresePoletti:
+      hits = 39,  strikes = 9,  misses = 11
+      precision = 0.6088,  recall = 0.6253,  f-measure = 0.6169
+  - NickLouth:
+      hits = 17,  strikes = 8,  misses = 33
+      precision = 0.6098,  recall = 0.6171,  f-measure = 0.6135
+  - SarahDavison:
+      hits = 3,  strikes = 8,  misses = 47
+      precision = 0.6077,  recall = 0.6017,  f-measure = 0.6047
+  - TimFarrand:
+      hits = 27,  strikes = 9,  misses = 23
+      precision = 0.6106,  recall = 0.6000,  f-measure = 0.6052
+  - KevinDrawbaugh:
+      hits = 18,  strikes = 4,  misses = 32
+      precision = 0.6130,  recall = 0.5937,  f-measure = 0.6032
+  - KarlPenhaul:
+      hits = 49,  strikes = 68,  misses = 1
+      precision = 0.6014,  recall = 0.6036,  f-measure = 0.6025
+  - JanLopatka:
+      hits = 34,  strikes = 15,  misses = 16
+      precision = 0.6037,  recall = 0.6055,  f-measure = 0.6046
+  - MarcelMichelson:
+      hits = 29,  strikes = 14,  misses = 21
+      precision = 0.6052,  recall = 0.6049,  f-measure = 0.6050
+  - BradDorfman:
+      hits = 35,  strikes = 16,  misses = 15
+      precision = 0.6071,  recall = 0.6071,  f-measure = 0.6071
+  - KeithWeir:
+      hits = 36,  strikes = 6,  misses = 14
+      precision = 0.6120,  recall = 0.6098,  f-measure = 0.6109
+  - FumikoFujisaki:
+      hits = 47,  strikes = 6,  misses = 3
+      precision = 0.6187,  recall = 0.6173,  f-measure = 0.6180
+  - JoeOrtiz:
+      hits = 35,  strikes = 17,  misses = 15
+      precision = 0.6199,  recall = 0.6191,  f-measure = 0.6195
+  - RobinSidel:
+      hits = 42,  strikes = 0,  misses = 8
+      precision = 0.6269,  recall = 0.6239,  f-measure = 0.6254
+  - LydiaZajc:
+      hits = 22,  strikes = 4,  misses = 28
+      precision = 0.6294,  recall = 0.6200,  f-measure = 0.6247
+  - GrahamEarnshaw:
+      hits = 39,  strikes = 9,  misses = 11
+      precision = 0.6331,  recall = 0.6233,  f-measure = 0.6282
+  - AlanCrosby:
+      hits = 35,  strikes = 22,  misses = 15
+      precision = 0.6326,  recall = 0.6249,  f-measure = 0.6287
+  - PeterHumphrey:
+      hits = 29,  strikes = 51,  misses = 21
+      precision = 0.6240,  recall = 0.6240,  f-measure = 0.6240
+-> writing confusion matrix to  conf.csv
