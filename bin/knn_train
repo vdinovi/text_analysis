@@ -49,4 +49,4 @@ echo "-- C50 Train --"
     time $PYTHON ../../src/knnAuthorship.py --save model.pickle --outfile result.out vectors.csv > work.out
     $PYTHON ../../src/classifierEvaluator.py truths.out result.out conf.csv > stats.out
     echo "Finished Both"
-) &
+)

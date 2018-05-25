@@ -15,5 +15,15 @@ echo "-- C50 Train --"
     cd ../tmp/cluster_train
     $PYTHON ../../src/textVectorizer.py --stopword ../../src/stopwords.txt $DATA_DIR truths.out vectors.csv > vocab.out
     $PYTHON ../../src/clusteringAuthorship.py vectors.csv dendrogram.json
+    $PYTHON ../../src/clusterEvaluator.py ../..
     echo "Finished Cluster"
-) &
+) 
+
+(
+   echo "Regular"
+   rm -r ../tmp/cluster_train
+   mkdir ../tmp/cluster_train
+   cd ../tmp/cluster_train
+   $PYTHON ../../src/clusteringAuthorship.py ../../cluster_results/train/C50train_dendrogram.pickle
+
+)
