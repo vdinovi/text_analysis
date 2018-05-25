@@ -1,0 +1,9 @@
+
+-- KNN --
+python3 textVectorizer.py  [--stopword STOPWORD] [--stemming] DATA_DIR TRUTHS_FILE VECTORS_FILE
+python3 knnAuthorship.py VECTORS_FILE [--dist-method 'COSINE' | 'OKAPI'] [--save model.pickle] [--load model.pickle] [--outfile RESULT_OUTFILE
+python3 classifierEvaluator.py TRUTHS_FILE RESULTS_FILE CONF_MATRIX_FILE
+ 
+ 
+ -- H. Clustering --
+ 
